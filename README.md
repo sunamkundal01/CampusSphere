@@ -2,7 +2,7 @@
 
 Your all-in-one academic collaboration platform connecting students through skill-based discovery, material sharing, and personal workspace management. Built with modern web technologies and AI-powered insights.
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-green?style=for-the-badge&logo=vercel)](https://ai-pdf-note-taker-gray.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-green?style=for-the-badge&logo=vercel)](https://campus-sphere-teal.vercel.app/)
 
 ## Features ✨
 
@@ -24,14 +24,6 @@ Your all-in-one academic collaboration platform connecting students through skil
 - **Styling**: Tailwind CSS
 - **Hosting**: Vercel
 
-## Screenshots:
-
-![image](https://github.com/user-attachments/assets/fe027fe5-ff68-4d9c-b9f6-d8c1a2a50086)
-
-![image](https://github.com/user-attachments/assets/8f6eba4e-683a-4c1e-aa44-1e367ac1c700)
-
-![image](https://github.com/user-attachments/assets/77a23a2d-3623-476f-b7d8-4e366066d2ce)
-
 ## Getting Started 🚀
 
 ### Prerequisites
@@ -46,7 +38,7 @@ Your all-in-one academic collaboration platform connecting students through skil
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/AI-PDF-to-Notes.git
+git clone https://github.com/your-username/Ai-Pdf-Note-Taker.git
 ```
 
 2. Install dependencies:
@@ -62,7 +54,8 @@ npm install
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_pub_key
 CLERK_SECRET_KEY=your_clerk_secret_key
 NEXT_PUBLIC_CONVEX_URL=your_convex_url
-GEMINI_API_KEY=your_gemini_key
+NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
+CONVEX_DEPLOYMENT=your_convex_deployment
 ```
 
 4. Run the development server:
@@ -73,13 +66,25 @@ npm run dev
 
 ## Usage 📖
 
-1. Sign up/Sign in using Clerk authentication
-2. Upload your PDF document
-3. Start chatting with your PDF:
-   - Ask for summaries
-   - Request specific information
-   - Get key points and insights
-4. View previous conversations in your chat history
+### For Students & Academic Community
+
+1. **Profile Setup**: Sign up/Sign in using Clerk authentication and complete your academic profile
+2. **Community Engagement**:
+   - Browse and upload PYQs (Previous Year Questions) to share with your community
+   - Discover fellow students based on skills and academic interests
+   - Connect with study partners and project collaborators
+3. **Personal Workspace**:
+   - Upload PDF documents for AI-powered analysis
+   - Create and manage private notes with intelligent insights
+   - Chat with your PDFs to extract summaries and specific information
+4. **Skill-based Discovery**: Find and connect with peers who complement your academic journey
+
+### Dashboard Features
+
+- **Community Tab**: Explore shared academic materials and connect with students
+- **Profile Management**: Showcase your skills, department, and academic achievements
+- **Workspace**: Access your private PDF analysis and note-taking tools
+- **PYQ Repository**: Upload and browse previous year questions
 
 ## Contributing 🤝
 
