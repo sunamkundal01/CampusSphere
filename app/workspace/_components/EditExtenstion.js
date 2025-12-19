@@ -21,40 +21,45 @@ const EditExtenstion = ({ editor }) => {
     const onAiClick=async()=>{
       toast("AI is getting your answer 🪄")
       
-      const selectedText = editor.state.doc.textBetween(
-        editor.state.selection.from,
-        editor.state.selection.to,
-        ' '
-      )
-      console.log(selectedText);  
-      console.log(fileId);
-          
-      const result = await searchAi({
-        query:selectedText,
-        fileId:fileId
-      })
+      try {
+        const selectedText = editor.state.doc.textBetween(
+          editor.state.selection.from,
+          editor.state.selection.to,
+          ' '
+        )
+        console.log(selectedText);  
+        console.log(fileId);
+            
+        const result = await searchAi({
+          query:selectedText,
+          fileId:fileId
+        })
 
-      const UnformatedAnwer = JSON.parse(result);
-      let AllUnformatedAnwer = '';
-      UnformatedAnwer&&UnformatedAnwer.forEach(item=>{
-        AllUnformatedAnwer = AllUnformatedAnwer+item.pageContent
-      })
-      
-      const PROMPT = "For question :"+selectedText+" and with the given content as answer, please give appropriate only one answer in HTML format. The answer content is: "+AllUnformatedAnwer
-         
+        const UnformatedAnwer = JSON.parse(result);
+        let AllUnformatedAnwer = '';
+        UnformatedAnwer&&UnformatedAnwer.forEach(item=>{
+          AllUnformatedAnwer = AllUnformatedAnwer+item.pageContent
+        })
+        
+        const PROMPT = "For question :"+selectedText+" and with the given content as answer, please give appropriate only one answer in HTML format. The answer content is: "+AllUnformatedAnwer
+           
 
-      const AIModelResult = await chatSession.sendMessage(PROMPT)
-      console.log(AIModelResult.response.text());
-      const finalAns = AIModelResult.response.text().replace('```','').replace('html','').replace('```','')
-      
-      const AllText= editor.getHTML();
-      editor.commands.setContent(AllText+'<p> <strong> Answer: </strong></p>'+finalAns)
-      
-      saveNotes({
-        notes:editor.getHTML(),
-        fileId:fileId,
-        createdBy:user?.primaryEmailAddress.emailAddress
-      })
+        const AIModelResult = await chatSession.sendMessage(PROMPT)
+        console.log(AIModelResult.response.text());
+        const finalAns = AIModelResult.response.text().replace('```','').replace('html','').replace('```','')
+        
+        const AllText= editor.getHTML();
+        editor.commands.setContent(AllText+'<p> <strong> Answer: </strong></p>'+finalAns)
+        
+        saveNotes({
+          notes:editor.getHTML(),
+          fileId:fileId,
+          createdBy:user?.primaryEmailAddress.emailAddress
+        })
+      } catch (error) {
+        console.error("Gemini API Error:", error);
+        toast.error("Failed to get AI response: " + error.message);
+      }
       
     }
     
