@@ -35,18 +35,20 @@ const EditExtenstion = ({ editor }) => {
           fileId:fileId
         })
 
-        const UnformatedAnwer = JSON.parse(result);
-        let AllUnformatedAnwer = '';
-        UnformatedAnwer&&UnformatedAnwer.forEach(item=>{
-          AllUnformatedAnwer = AllUnformatedAnwer+item.pageContent
-        })
+        const parsedResult = JSON.parse(result);
+        // New format: { answer: string, context: [{text: string}] }
+        // Use the answer directly from Gemini
+        const answer = parsedResult.answer || '';
         
-        const PROMPT = "For question :"+selectedText+" and with the given content as answer, please give appropriate only one answer in HTML format. The answer content is: "+AllUnformatedAnwer
-           
-
-        const AIModelResult = await chatSession.sendMessage(PROMPT)
-        console.log(AIModelResult.response.text());
-        const finalAns = AIModelResult.response.text().replace('```','').replace('html','').replace('```','')
+        // Format the answer in HTML if it's not already
+        let finalAns = answer;
+        if (!answer.includes('<')) {
+          // Convert plain text to HTML paragraphs
+          finalAns = answer.split('\n').map(para => para.trim() ? `<p>${para}</p>` : '').join('');
+        } else {
+          // Clean up any markdown-style code blocks
+          finalAns = answer.replace(/```html/g, '').replace(/```/g, '');
+        }
         
         const AllText= editor.getHTML();
         editor.commands.setContent(AllText+'<p> <strong> Answer: </strong></p>'+finalAns)
