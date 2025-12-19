@@ -3,7 +3,7 @@
 import { ConvexVectorStore } from "@langchain/community/vectorstores/convex";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { TaskType } from "@google/generative-ai";
-import { action } from "./_generated/server.js";
+import { action } from ". /_generated/server. js";
 import { v } from "convex/values";
 
 export const ingest = action({
@@ -12,36 +12,34 @@ export const ingest = action({
     fileId: v.any(),
   },
   handler: async (ctx, args) => {
-    // Ensure the fileId is stored in the desired format
     const formattedMetadata = { fileId: args.fileId };
 
     await ConvexVectorStore.fromTexts(
-      args.sliptText, // Array of texts
-      formattedMetadata,  // Pass the metadata as an object
+      args.sliptText,
+      formattedMetadata,
       new GoogleGenerativeAIEmbeddings({
-        apiKey: 'AIzaSyAnnFpHYGUSb4GmGe6LtutpA_OTeOtQwIw',
-        model: 'text-embedding-004', // 768 dimensions
+        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY, // ✅ Use env variable
+        model: 'text-embedding-004',
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: 'Document title',
       }),
       { ctx }
     );
 
-    return "Completed....";
+    return "Completed.... ";
   },
 });
-
 
 export const search = action({
   args: {
     query: v.string(),
-    fileId:v.string()
+    fileId: v.string()
   },
   handler: async (ctx, args) => {
     const vectorStore = new ConvexVectorStore(
       new GoogleGenerativeAIEmbeddings({
-        apiKey:'AIzaSyAnnFpHYGUSb4GmGe6LtutpA_OTeOtQwIw',
-        model: "text-embedding-004", // 768 dimensions
+        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY, // ✅ Use env variable
+        model: "text-embedding-004",
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         title: "Document title",
       })
