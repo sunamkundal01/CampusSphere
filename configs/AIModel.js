@@ -4,7 +4,14 @@ const {
     HarmBlockThreshold,
   } = require("@google/generative-ai");
   
-  const apiKey = process. env.NEXT_PUBLIC_GEMINI_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+
+  if (!apiKey) {
+    console.error("❌ GEMINI API KEY NOT FOUND! Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.");
+  } else if (process.env.NODE_ENV !== 'production') {
+    console.log("✅ Gemini API Key loaded");
+  }
+
   const genAI = new GoogleGenerativeAI(apiKey);
   
   // ✅ gemini-2.5-flash is valid and supported! 
