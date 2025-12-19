@@ -27,13 +27,11 @@ export default defineSchema({
   }),
 
   documents: defineTable({
-    embedding: v.array(v.number()),
     text: v.string(),
     metadata: v.any(),
-  }).vectorIndex("byEmbedding", {
-    vectorField: "embedding",
-    dimensions: 768,
-  }),
+    fileId: v.string(),
+    chunkIndex: v.number(),
+  }).index("by_fileId", ["fileId"]),
 
   notes: defineTable({
     fileId: v.string(),
