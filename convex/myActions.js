@@ -45,8 +45,19 @@ export const search = action({
       fileId: args.fileId 
     });
 
-    // Build context from all chunks
-    const context = chunks.map(c => c.text).join("\n\n");
+    // Build context from chunks with size limit to avoid token limits
+    // Gemini 2.0 Flash has ~1M token context, but we'll be conservative
+    const maxContextLength = 50000; // ~50K characters should be safe
+    let context = "";
+    let usedChunks = [];
+    
+    for (const chunk of chunks) {
+      if (context.length + chunk.text.length > maxContextLength) {
+        break;
+      }
+      context += chunk.text + "\n\n";
+      usedChunks.push(chunk);
+    }
 
     // Use Gemini API to generate response based on document context
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
@@ -59,7 +70,7 @@ export const search = action({
     // Return formatted results with answer and context
     return JSON.stringify({
       answer: answer,
-      context: chunks.slice(0, 3).map(c => ({ text: c.text })) // Return top 3 chunks as context
+      context: usedChunks.slice(0, 3).map(c => ({ text: c.text })) // Return top 3 chunks as context
     });
   },
 });
