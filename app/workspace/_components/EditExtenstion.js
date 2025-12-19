@@ -58,7 +58,7 @@ const EditExtenstion = ({ editor }) => {
         })
       } catch (error) {
         console.error("Gemini API Error:", error);
-        toast.error("Failed to get AI response: " + error.message);
+        toast.error("Failed to get AI response. Please try again or check your API key configuration.");
       }
       
     }
