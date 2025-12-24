@@ -4,10 +4,12 @@ const {
     HarmBlockThreshold,
   } = require("@google/generative-ai");
   
-  const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  // Server-side only: This file is now primarily for server-side API route usage
+  // Client-side code should use the /api/gemini endpoint instead
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
-    console.error("❌ GEMINI API KEY NOT FOUND! Please set NEXT_PUBLIC_GEMINI_API_KEY in your environment variables.");
+    console.error("❌ GEMINI API KEY NOT FOUND! Please set GEMINI_API_KEY in your environment variables.");
   } else if (process.env.NODE_ENV !== 'production') {
     console.log("✅ Gemini API Key loaded");
   }

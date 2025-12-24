@@ -3,7 +3,6 @@ import React from 'react'
 import { useParams } from 'next/navigation';
 import { useAction, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import {chatSession} from '../../../configs/AIModel'
 import { AlignCenter, AlignLeft, AlignRight, BoldIcon, HighlighterIcon, Italic, Redo2Icon, SparklesIcon, Strikethrough, UnderlineIcon, Undo2Icon, WandSparklesIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useUser } from '@clerk/nextjs';
@@ -44,9 +43,26 @@ const EditExtenstion = ({ editor }) => {
         const PROMPT = "For question :"+selectedText+" and with the given content as answer, please give appropriate only one answer in HTML format. The answer content is: "+AllUnformatedAnwer
            
 
-        const AIModelResult = await chatSession.sendMessage(PROMPT)
-        console.log(AIModelResult.response.text());
-        const finalAns = AIModelResult.response.text().replace('```','').replace('html','').replace('```','')
+        // Call the server-side API route instead of direct client-side call
+        const apiResponse = await fetch('/api/gemini', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: PROMPT,
+            history: []
+          })
+        });
+
+        const apiData = await apiResponse.json();
+        
+        if (!apiData.success) {
+          throw new Error(apiData.error || 'Failed to get AI response');
+        }
+
+        console.log(apiData.response);
+        const finalAns = apiData.response.replace('```','').replace('html','').replace('```','')
         
         const AllText= editor.getHTML();
         editor.commands.setContent(AllText+'<p> <strong> Answer: </strong></p>'+finalAns)
@@ -56,6 +72,8 @@ const EditExtenstion = ({ editor }) => {
           fileId:fileId,
           createdBy:user?.primaryEmailAddress.emailAddress
         })
+        
+        toast.success("AI response received successfully! ✨")
       } catch (error) {
         console.error("Gemini API Error:", error);
         toast.error("Failed to get AI response. Please try again or check your API key configuration.");
