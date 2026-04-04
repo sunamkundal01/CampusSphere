@@ -1,91 +1,162 @@
-# CampusSphere 🎓🌐
+# CampusSphere
 
 Your all-in-one academic collaboration platform connecting students through skill-based discovery, material sharing, and personal workspace management. Built with modern web technologies and AI-powered insights.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Online-green?style=for-the-badge&logo=vercel)](https://campus-sphere-nitsri.vercel.app/)
 
-## Features ✨
+## Features
 
 - **Academic Material Sharing** - Upload and share PYQs (Previous Year Questions) with your academic community
 - **Student Networking** - Connect with peers based on skills, departments, and academic interests
-- **Personal Workspace** - Private note-taking with AI-powered PDF analysis and insights
+- **Personal Workspace** - Private note-taking with a rich text editor and AI-powered PDF analysis
 - **Smart Discovery** - Find study partners and collaborators through skill-based matching
 - **Community Profiles** - Showcase your academic journey, skills, and expertise
-- **Secure Authentication** - User management powered by Clerk
+- **AI Chat with PDFs** - Upload PDFs and ask questions to get summaries and insights powered by Google Gemini
+- **Export Notes** - Export your notes as DOCX documents
 - **Real-time Database** - Built on Convex for seamless data synchronization
-- **Responsive UI** - Modern interface built with Next.js 14
 
-## Tech Stack 🛠️
+## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router)
-- **Backend**: Convex (Database & Server Functions)
-- **Authentication**: Clerk
-- **AI**: Gemini API
-- **Styling**: Tailwind CSS
-- **Hosting**: Vercel
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | Next.js 15 (App Router) |
+| **Backend** | Convex (Database, Server Functions & File Storage) |
+| **Authentication** | Firebase (Google OAuth) |
+| **AI** | Google Gemini API + LangChain |
+| **Text Editor** | Tiptap |
+| **UI Components** | shadcn/ui (Radix UI) |
+| **Styling** | Tailwind CSS |
+| **Hosting** | Vercel |
 
-## Getting Started 🚀
+## Getting Started
 
 ### Prerequisites
 
-- Node.js v18+
-- Convex account
-- Clerk account
-- Gemini API key
+- [Node.js](https://nodejs.org/) v18 or higher
+- A [Firebase](https://console.firebase.google.com/) project with Google sign-in enabled
+- A [Convex](https://www.convex.dev/) account and project
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
 
-```bash
-git clone https://github.com/your-username/Ai-Pdf-Note-Taker.git
+   ```bash
+   git clone https://github.com/sunamkundal01/CampusSphere.git
+   cd CampusSphere
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up Convex**
+
+   If this is your first time, log in and initialize Convex:
+
+   ```bash
+   npx convex dev
+   ```
+
+   This will prompt you to create or link a Convex project and will push your schema and functions.
+
+4. **Set up environment variables**
+
+   Create a `.env.local` file in the project root:
+
+   ```env
+   # Firebase Authentication
+   NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+   # Convex
+   NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
+   CONVEX_DEPLOYMENT=dev:your-deployment
+
+   # Google Gemini AI
+   GEMINI_API_KEY=your_gemini_api_key
+   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+   **Where to get these values:**
+   - **Firebase** - Go to your [Firebase Console](https://console.firebase.google.com/) > Project Settings > General > Your apps > Web app config
+   - **Convex** - Go to your [Convex Dashboard](https://dashboard.convex.dev/) > Settings > URL & Deploy Key
+   - **Gemini** - Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and create an API key
+
+5. **Run the development server**
+
+   You need two terminals running simultaneously:
+
+   **Terminal 1** - Convex backend:
+   ```bash
+   npx convex dev
+   ```
+
+   **Terminal 2** - Next.js frontend:
+   ```bash
+   npm run dev
+   ```
+
+6. **Open the app**
+
+   Visit [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Project Structure
+
+```
+CampusSphere/
+├── app/
+│   ├── (auth)/              # Sign-in and sign-up pages
+│   ├── api/                 # API routes (Gemini AI, PDF loader)
+│   ├── dashboard/           # Main dashboard with community, profile, PYQs
+│   │   └── _components/     # Dashboard components
+│   └── workspace/           # Personal workspace (PDF viewer, text editor)
+│       └── _components/     # Workspace components
+├── components/ui/           # Reusable UI components (shadcn/ui)
+├── configs/                 # AI model configuration
+├── convex/                  # Backend functions, schema, and file storage
+├── lib/                     # Utilities, Firebase config, auth context
+└── public/                  # Static assets
 ```
 
-2. Install dependencies:
+## Usage
 
-```bash
-npm install
-```
+### Getting Started as a User
 
-3. Set up environment variables:
-   Create `.env.local` file with:
+1. **Sign up** using your Google account
+2. **Complete your profile** - Add your name, department, skills, and bio
+3. **Explore the dashboard** - Browse the community, connect with students, and share materials
 
-```env
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_oauth_client_id
-NEXT_PUBLIC_CONVEX_URL=your_convex_url
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
-CONVEX_DEPLOYMENT=your_convex_deployment
-```
+### Dashboard
 
-4. Run the development server:
+- **Community** - Discover students by skills and department, view shared profiles
+- **PYQ Repository** - Upload and browse previous year question papers by subject and year
+- **Profile** - Manage your academic profile and showcase your skills
 
-```bash
-npm run dev
-```
+### Workspace
 
-## Usage 📖
+- **Upload PDFs** - Upload documents for AI-powered analysis
+- **Chat with PDFs** - Ask questions about your uploaded PDFs and get AI-generated answers
+- **Rich Text Notes** - Take notes alongside your PDFs using the built-in editor
+- **Export** - Download your notes as DOCX files
 
-### For Students & Academic Community
+## Scripts
 
-1. **Profile Setup**: Sign up/Sign in using Google OAuth and complete your academic profile
-2. **Community Engagement**:
-   - Browse and upload PYQs (Previous Year Questions) to share with your community
-   - Discover fellow students based on skills and academic interests
-   - Connect with study partners and project collaborators
-3. **Personal Workspace**:
-   - Upload PDF documents for AI-powered analysis
-   - Create and manage private notes with intelligent insights
-   - Chat with your PDFs to extract summaries and specific information
-4. **Skill-based Discovery**: Find and connect with peers who complement your academic journey
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the Next.js development server |
+| `npm run build` | Build for production |
+| `npm start` | Start the production server |
+| `npm run lint` | Run ESLint |
+| `npx convex dev` | Start Convex dev server and sync functions |
 
-### Dashboard Features
-
-- **Community Tab**: Explore shared academic materials and connect with students
-- **Profile Management**: Showcase your skills, department, and academic achievements
-- **Workspace**: Access your private PDF analysis and note-taking tools
-- **PYQ Repository**: Upload and browse previous year questions
-
-## Contributing 🤝
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -95,13 +166,15 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## License 📄
+## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## Acknowledgments 🙏
+## Acknowledgments
 
-- Google Gemini API for AI capabilities
-- Convex for real-time database functionality
-- Google OAuth for secure authentication
-- Vercel for hosting and deployment
+- [Google Gemini API](https://ai.google.dev/) for AI capabilities
+- [Convex](https://www.convex.dev/) for real-time database functionality
+- [Firebase](https://firebase.google.com/) for authentication
+- [Vercel](https://vercel.com/) for hosting and deployment
+- [Tiptap](https://tiptap.dev/) for the rich text editor
+- [shadcn/ui](https://ui.shadcn.com/) for UI components
