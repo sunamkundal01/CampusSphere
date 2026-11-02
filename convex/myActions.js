@@ -1,53 +1,48 @@
-"use node";
-
-import { ConvexVectorStore } from "@langchain/community/vectorstores/convex";
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
-import { TaskType } from "@google/generative-ai";
-import { action } from "./_generated/server.js";
+import { action, internalMutation, internalQuery } from "./_generated/server.js";
+import { internal } from "./_generated/api.js";
 import { v } from "convex/values";
+import { rankPdfChunks } from "../lib/pdfRetrieval.js";
 
-export const ingest = action({
-  args: {
-    sliptText: v.any(),
-    fileId: v.any(),
+export const storeChunks = internalMutation({
+  args: { sliptText: v.array(v.string()), fileId: v.string() },
+  handler: async (ctx, { sliptText, fileId }) => {
+    const previous = await ctx.db.query("documents")
+      .withIndex("by_fileId", (q) => q.eq("fileId", fileId)).collect();
+    for (const doc of previous) await ctx.db.delete(doc._id);
+    for (const text of sliptText) {
+      if (text.trim()) {
+        await ctx.db.insert("documents", { text, fileId, metadata: { fileId } });
+      }
+    }
   },
+});
+
+export const getChunks = internalQuery({
+  args: { fileId: v.string() },
+  handler: async (ctx, { fileId }) => {
+    const chunks = await ctx.db.query("documents")
+      .withIndex("by_fileId", (q) => q.eq("fileId", fileId)).collect();
+    if (chunks.length) return chunks.map(({ text, metadata }) => ({ text, metadata }));
+    // PDFs uploaded before migration only have metadata.fileId.
+    const legacy = await ctx.db.query("documents")
+      .filter((q) => q.eq(q.field("metadata.fileId"), fileId)).collect();
+    return legacy.map(({ text, metadata }) => ({ text, metadata }));
+  },
+});
+
+// Preserve the action contract used by both upload components.
+export const ingest = action({
+  args: { sliptText: v.array(v.string()), fileId: v.string() },
   handler: async (ctx, args) => {
-    const formattedMetadata = { fileId: args.fileId };
-
-    await ConvexVectorStore.fromTexts(
-      args.sliptText,
-      formattedMetadata,
-      new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY, // ✅ Use env variable
-        model: 'gemini-embedding-001',
-        taskType: TaskType.RETRIEVAL_DOCUMENT,
-        title: 'Document title',
-      }),
-      { ctx }
-    );
-
-    return "Completed.... ";
+    await ctx.runMutation(internal.myActions.storeChunks, args);
+    return "Completed";
   },
 });
 
 export const search = action({
-  args: {
-    query: v.string(),
-    fileId: v.string()
-  },
-  handler: async (ctx, args) => {
-    const vectorStore = new ConvexVectorStore(
-      new GoogleGenerativeAIEmbeddings({
-        apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY, // ✅ Use env variable
-        model: "gemini-embedding-001",
-        taskType: TaskType.RETRIEVAL_DOCUMENT,
-        title: "Document title",
-      })
-      , { ctx });
-
-    const resultOne = await (await vectorStore.similaritySearch(args.query, 1)).filter(q=>q.metadata.fileId==args.fileId)
-    console.log(resultOne);
-
-    return JSON.stringify(resultOne)
+  args: { query: v.string(), fileId: v.string() },
+  handler: async (ctx, { query, fileId }) => {
+    const chunks = await ctx.runQuery(internal.myActions.getChunks, { fileId });
+    return JSON.stringify(rankPdfChunks(chunks, query));
   },
 });

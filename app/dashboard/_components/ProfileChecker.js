@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUser } from "../../../lib/GoogleAuthContext";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
@@ -9,36 +9,23 @@ import ProfileSetup from "./ProfileSetup";
 function ProfileChecker({ children }) {
   const { user } = useUser();
   const [showProfileSetup, setShowProfileSetup] = useState(false);
+  // Once the student skips or finishes, don't reopen the prompt for the rest of the session.
+  const handled = useRef(false);
 
   const userProfile = useQuery(api.userProfiles.getUserProfile, {
     email: user?.primaryEmailAddress?.emailAddress || "",
   });
 
   useEffect(() => {
-    console.log(
-      "ProfileChecker - user:",
-      user?.primaryEmailAddress?.emailAddress
-    );
-    console.log("ProfileChecker - userProfile:", userProfile);
-
-    if (user && userProfile !== undefined) {
-      // If user exists but doesn't have a complete profile, show setup
-      // This includes: no profile exists (null), or profile exists but isProfileComplete is false or undefined
-      const shouldShowSetup =
-        !userProfile || userProfile.isProfileComplete !== true;
-      console.log("ProfileChecker - shouldShowSetup:", shouldShowSetup);
-
-      if (shouldShowSetup) {
-        setShowProfileSetup(true);
-      }
+    if (handled.current || !user || userProfile === undefined) return;
+    // No profile yet (null), or a profile that isn't marked complete.
+    if (!userProfile || userProfile.isProfileComplete !== true) {
+      setShowProfileSetup(true);
     }
   }, [user, userProfile]);
 
-  const handleProfileComplete = () => {
-    setShowProfileSetup(false);
-  };
-
-  const handleSkipForNow = () => {
+  const close = () => {
+    handled.current = true;
     setShowProfileSetup(false);
   };
 
@@ -47,11 +34,7 @@ function ProfileChecker({ children }) {
       {children}
 
       {/* Profile Setup Modal */}
-      <ProfileSetup
-        isOpen={showProfileSetup}
-        onClose={handleSkipForNow}
-        onComplete={handleProfileComplete}
-      />
+      <ProfileSetup isOpen={showProfileSetup} onClose={close} onComplete={close} />
     </>
   );
 }

@@ -1,8 +1,7 @@
 "use client";
 
 import { UserButton } from "../../../components/ui/UserButton";
-import Image from "next/image";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -10,7 +9,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useUser } from "../../../lib/GoogleAuthContext";
 import { toast } from "sonner";
-import { ChevronDown, Download, FileText, FileImage } from "lucide-react";
+import { ArrowLeft, Check, ChevronDown, CircleDot, Download, FileText, FileImage, Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,13 +21,26 @@ export const WorkspaceHeader = ({ fileName, editor }) => {
   const { fileId } = useParams();
   const { user } = useUser();
   const [saving, setSaving] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const saveNotes = useMutation(api.notes.AddNotes);
   const notes = useQuery(api.notes.GetNotes, {
     fileId: fileId,
   });
 
-  const onSave = async () => {
+  // Compare the live editor with the last saved notes to show an honest save state.
+  useEffect(() => {
+    if (!editor) return;
+    const check = () => setDirty(editor.getHTML() !== (notes || "<p></p>"));
+    const id = setTimeout(check, 0);
+    editor.on("update", check);
+    return () => {
+      clearTimeout(id);
+      editor.off("update", check);
+    };
+  }, [editor, notes]);
+
+  const onSave = useCallback(async () => {
     if (!editor) {
       toast("No content to save");
       return;
@@ -41,14 +53,25 @@ export const WorkspaceHeader = ({ fileName, editor }) => {
         fileId: fileId,
         createdBy: user?.primaryEmailAddress.emailAddress,
       });
-      toast("Notes saved successfully!");
+      toast.success("Notes saved");
     } catch (error) {
       console.error("Save error:", error);
-      toast("Error saving notes");
+      toast.error("Couldn't save your notes", { description: "Check your connection and try again." });
     } finally {
       setSaving(false);
     }
-  };
+  }, [editor, fileId, saveNotes, user]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        onSave();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onSave]);
 
   const downloadAsPDF = () => {
     if (!notes) {
@@ -205,52 +228,70 @@ export const WorkspaceHeader = ({ fileName, editor }) => {
   };
 
   return (
-    <div className="p-4 flex justify-between shadow-md">
-      <Link href={"/"}>
-        <Image
-          src={"/logo.svg"}
-          alt="CampusSphere"
-          width={120}
-          height={90}
-          className="logo-primary logo-sidebar cursor-pointer"
-        />
-      </Link>
-      <h2 className="font-bold">{fileName}</h2>
-      <div className="flex gap-2">
-        <Button onClick={onSave} disabled={saving}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-2 sm:h-16 sm:gap-3 sm:px-4">
+      <Button asChild variant="ghost" size="icon" aria-label="Back to my workspace">
+        <Link href="/dashboard/workspace">
+          <ArrowLeft />
+        </Link>
+      </Button>
 
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <span className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:flex">
+          <FileText className="h-[18px] w-[18px]" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-base font-semibold sm:text-lg" title={fileName}>
+            {fileName || <span className="inline-block h-5 w-40 animate-pulse rounded bg-secondary align-middle" />}
+          </h1>
+          <p className="flex items-center gap-1 text-xs text-muted-foreground" aria-live="polite">
+            {saving ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> Saving…
+              </>
+            ) : dirty ? (
+              <>
+                <CircleDot className="h-3 w-3 text-warning" aria-hidden="true" /> Unsaved changes
+              </>
+            ) : (
+              <>
+                <Check className="h-3 w-3 text-success" aria-hidden="true" /> All changes saved
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         {notes && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <Download size={16} />
-                Download
-                <ChevronDown size={16} />
+              <Button variant="outline" size="sm" className="h-9" aria-label="Export notes">
+                <Download aria-hidden="true" />
+                <span className="hidden sm:inline">Export</span>
+                <ChevronDown className="hidden sm:block" aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={downloadAsPDF}
-                className="flex items-center gap-2"
-              >
-                <FileImage size={16} />
+            <DropdownMenuContent align="end" className="rounded-xl p-1.5">
+              <DropdownMenuItem onClick={downloadAsPDF} className="cursor-pointer gap-2 py-2">
+                <FileImage size={16} aria-hidden="true" />
                 Download as PDF
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={downloadAsDOCX}
-                className="flex items-center gap-2"
-              >
-                <FileText size={16} />
+              <DropdownMenuItem onClick={downloadAsDOCX} className="cursor-pointer gap-2 py-2">
+                <FileText size={16} aria-hidden="true" />
                 Download as DOCX
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
-        <UserButton />
+        <Button onClick={onSave} disabled={saving || !dirty} size="sm" className="h-9" title="Save (Ctrl/⌘ + S)">
+          {saving ? "Saving…" : "Save"}
+        </Button>
+
+        <span className="hidden sm:block">
+          <UserButton />
+        </span>
       </div>
-    </div>
+    </header>
   );
 };

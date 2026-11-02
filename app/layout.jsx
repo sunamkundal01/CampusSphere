@@ -1,21 +1,28 @@
 import "./globals.css";
-import { Outfit } from "next/font/google";
+import { Inter, Outfit } from "next/font/google";
 import Providere from "./Providere";
 import { GoogleAuthProvider } from "../lib/GoogleAuthContext";
 import { Toaster } from "../components/ui/sonner";
 
-const outfit = Outfit({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 export const metadata = {
-  title: "CampusSphere - Academic Collaboration Platform",
+  title: "CampusSphere - PYQs, AI study notes and classmates in one place",
   description:
-    "Connect with peers, share study materials, and manage your academic workspace with CampusSphere",
+    "Find previous year papers, chat with your PDFs using AI, and connect with classmates by skill. Free for students.",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={outfit.className}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <body>
         <GoogleAuthProvider>
           <Providere>{children}</Providere>
           <Toaster />

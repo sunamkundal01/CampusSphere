@@ -86,12 +86,40 @@ html {
   }
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Basic editor styles */
 .tiptap {
+  line-height: 1.7;
+
+  p {
+    margin: 0.6rem 0;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  ul ul {
+    list-style-type: circle;
+  }
+
   :first-child {
     margin-top: 0;
   }
@@ -100,7 +128,7 @@ body {
   ul,
   ol {
     padding: 0 1rem;
-    margin: 1.25rem 1rem 1.25rem 0.4rem;
+    margin: 0.75rem 0 1rem 0.5rem;
 
     li p {
       margin-top: 0.25em;
@@ -115,15 +143,16 @@ body {
   h4,
   h5,
   h6 {
-    line-height: 1.1;
-    margin-top: 2.5rem;
+    line-height: 1.35;
+    font-weight: 600;
+    margin-top: 1.25rem;
     text-wrap: pretty;
   }
 
   h1,
   h2 {
-    margin-top: 3.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.65rem;
   }
 
   h1 {
@@ -146,17 +175,18 @@ body {
 
   /* Code and preformatted text styles */
   code {
-    background-color: var(--purple-light);
+    background-color: #f1f5f9;
     border-radius: 0.4rem;
-    color: var(--black);
+    color: #0f172a;
     font-size: 0.85rem;
     padding: 0.25em 0.3em;
   }
 
   pre {
-    background: var(--black);
+    background: #0f172a;
     border-radius: 0.5rem;
-    color: var(--white);
+    color: #f8fafc;
+    overflow-x: auto;
     font-family: 'JetBrainsMono', monospace;
     margin: 1.5rem 0;
     padding: 0.75rem 1rem;
@@ -170,20 +200,20 @@ body {
   }
 
   blockquote {
-    border-left: 3px solid var(--gray-3);
+    border-left: 3px solid #cbd5e1;
     margin: 1.5rem 0;
     padding-left: 1rem;
   }
 
   hr {
     border: none;
-    border-top: 1px solid var(--gray-2);
+    border-top: 1px solid #e2e8f0;
     margin: 2rem 0;
   }
 
   /* Placeholder (at the top) */
   p.is-editor-empty:first-child::before {
-    color: var(--gray-4);
+    color: hsl(var(--muted-foreground));
     content: attr(data-placeholder);
     float: left;
     height: 0;
@@ -210,58 +240,69 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    /* Brand: CampusSphere blue (from the logo) with a violet reserved for AI */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 32% 95%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 19% 35%;
+    --accent: 214 100% 97%;
+    --accent-foreground: 224 76% 40%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 69% 31%;
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 44%;
+    --ai: 262 83% 58%;
+    --ai-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 86%;
+    --ring: 221 83% 53%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 189 94% 43%;
+    --chart-3: 262 83% 58%;
+    --chart-4: 152 69% 31%;
+    --chart-5: 32 95% 44%;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 64%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 72% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 152 60% 50%;
+    --success-foreground: 222 47% 11%;
+    --warning: 38 92% 60%;
+    --ai: 263 90% 72%;
+    --ai-foreground: 222 47% 11%;
+    --border: 217 33% 20%;
+    --input: 217 33% 24%;
+    --ring: 217 91% 64%;
+    --chart-1: 217 91% 64%;
+    --chart-2: 189 94% 53%;
+    --chart-3: 263 90% 72%;
+    --chart-4: 152 60% 50%;
+    --chart-5: 38 92% 60%;
   }
 }
 
@@ -271,6 +312,12 @@ body {
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
   }
 }

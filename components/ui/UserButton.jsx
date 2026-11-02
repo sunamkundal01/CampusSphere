@@ -1,74 +1,68 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import { useUser, useAuth } from "../../lib/GoogleAuthContext";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
+import Link from "next/link";
+import { LayoutDashboard, LogOut, User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./dropdown-menu";
+import { Avatar } from "./avatar";
 
 export function UserButton() {
   const { user } = useUser();
   const { signOut } = useAuth();
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
   const router = useRouter();
 
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     router.push("/");
   };
 
   if (!user) return null;
 
-  const initial =
-    user.fullName?.charAt(0)?.toUpperCase() ||
-    user.primaryEmailAddress?.emailAddress?.charAt(0)?.toUpperCase() ||
-    "U";
-
   return (
-    <div className="relative" ref={menuRef}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 overflow-hidden"
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-label="Open account menu"
       >
-        {user.imageUrl ? (
-          <img
-            src={user.imageUrl}
-            alt="avatar"
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          initial
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border z-50 py-2">
-          <div className="px-4 py-2 border-b">
-            <p className="text-sm font-medium truncate">{user.fullName || "User"}</p>
-            <p className="text-xs text-gray-500 truncate">
-              {user.primaryEmailAddress?.emailAddress}
-            </p>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </button>
-        </div>
-      )}
-    </div>
+        <Avatar src={user.imageUrl} name={user.fullName} size="sm" className="h-9 w-9" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-60 rounded-xl p-1.5">
+        <DropdownMenuLabel className="font-normal">
+          <p className="truncate text-sm font-semibold">{user.fullName || "Student"}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {user.primaryEmailAddress?.emailAddress}
+          </p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild className="cursor-pointer gap-2 py-2">
+          <Link href="/dashboard">
+            <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer gap-2 py-2">
+          <Link href="/dashboard/profile">
+            <User className="h-4 w-4" aria-hidden="true" />
+            My profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={handleSignOut}
+          className="cursor-pointer gap-2 py-2 text-destructive focus:bg-destructive/10 focus:text-destructive"
+        >
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          Sign out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
