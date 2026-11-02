@@ -11,14 +11,18 @@ import {
 } from "../../../components/ui/dialog";
 import { Input } from "../../../components/ui/input";
 import { Button } from "../../../components/ui/button";
-import { useAction, useMutation } from "convex/react";
+import { Select } from "../../../components/ui/select";
+import { useMutation } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Loader2Icon, Upload } from "lucide-react";
+import { Globe2, Loader2Icon, Upload } from "lucide-react";
 import { useState } from "react";
 import uuid4 from "uuid4";
 import { useUser } from "../../../lib/GoogleAuthContext";
 import { toast } from "sonner";
 import { SEMESTERS, SUBJECTS } from "./pyqConstants";
+import { FileDropzone, stripPdfExtension } from "./FileDropzone";
+
+const OTHER = "__other__";
 
 function UploadPyq({ children }) {
   const generateUploadUrl = useMutation(api.fileStorage.generateUploadUrl);
@@ -26,41 +30,48 @@ function UploadPyq({ children }) {
   const getFileUrl = useMutation(api.fileStorage.getFileUrl);
   const { user } = useUser();
 
-  const [file, setFile] = useState();
+  const [file, setFile] = useState(null);
+  const [fileError, setFileError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
   const [semester, setSemester] = useState("");
-  const [subject, setSubject] = useState("");
+  const [subjectChoice, setSubjectChoice] = useState("");
+  const [customSubject, setCustomSubject] = useState("");
   const [open, setOpen] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleOpenChange = (newOpen) => {
-    setOpen(newOpen);
+  const subject = subjectChoice === OTHER ? customSubject.trim() : subjectChoice;
+  const errors = {
+    name: !fileName.trim() && "Give the paper a name.",
+    semester: !semester && "Pick the semester.",
+    subject: !subject && (subjectChoice === OTHER ? "Type the subject name." : "Pick a subject."),
   };
 
-  const OnFileSelect = (event) => {
-    setFile(event.target.files[0]);
+  const reset = () => {
+    setFile(null);
+    setFileError(null);
+    setFileName("");
+    setSemester("");
+    setSubjectChoice("");
+    setCustomSubject("");
+    setSubmitted(false);
+  };
+
+  const handleOpenChange = (newOpen) => {
+    if (loading) return;
+    setOpen(newOpen);
+    if (!newOpen) reset();
+  };
+
+  const onFile = (picked) => {
+    setFile(picked);
+    if (picked && !fileName.trim()) setFileName(stripPdfExtension(picked.name));
   };
 
   const onUpload = async () => {
-    if (!file) {
-      toast.error("Please select a PDF file");
-      return;
-    }
-
-    if (!fileName.trim()) {
-      toast.error("Please enter a file name");
-      return;
-    }
-
-    if (!semester.trim()) {
-      toast.error("Please enter semester");
-      return;
-    }
-
-    if (!subject.trim()) {
-      toast.error("Please enter subject");
-      return;
-    }
+    setSubmitted(true);
+    if (!file) setFileError("Choose the PDF of the paper.");
+    if (!file || errors.name || errors.semester || errors.subject) return;
 
     setLoading(true);
 
@@ -75,168 +86,152 @@ function UploadPyq({ children }) {
         body: file,
       });
       const { storageId } = await result.json();
-      console.log("StorageId", storageId);
 
       const fileId = uuid4();
       const fileUrl = await getFileUrl({ storageId: storageId });
 
       // Step 3: Save the PYQ file entry to the database
-      const resp = await addPyqFileEntry({
+      await addPyqFileEntry({
         fileId: fileId,
         storageId: storageId,
-        fileName: fileName,
+        fileName: fileName.trim(),
         fileUrl: fileUrl,
         semester: semester,
         subject: subject,
         uploadedBy: user?.primaryEmailAddress?.emailAddress || "Anonymous",
       });
 
-      console.log(resp);
-
-      // Reset form
-      setFile(null);
-      setFileName("");
-      setSemester("");
-      setSubject("");
-
       setLoading(false);
       setOpen(false);
+      reset();
 
-      toast.success(
-        "PYQ uploaded successfully! It's now available for everyone."
-      );
+      toast.success("Thanks for sharing!", {
+        description: "Your paper is now in the PYQ library for everyone.",
+      });
     } catch (error) {
       console.error("Upload error:", error);
       setLoading(false);
-      toast.error("Failed to upload PYQ. Please try again.");
+      toast.error("Upload failed", { description: "Check your connection and try again." });
     }
   };
 
+  const fieldError = (key) =>
+    submitted && errors[key] ? (
+      <p id={`pyq-${key}-error`} className="mt-1.5 text-sm text-destructive">
+        {errors[key]}
+      </p>
+    ) : null;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <div onClick={() => setOpen(true)}>{children}</div>
-      </DialogTrigger>
-      <DialogContent className="w-[95vw] max-w-lg">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-h-[90dvh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <Upload className="h-5 w-5" />
-            Upload PYQ
-          </DialogTitle>
-          <DialogDescription className="text-sm">
-            Share a Previous Year Question paper with the community
+          <DialogTitle>Share a previous year paper</DialogTitle>
+          <DialogDescription>
+            Help your juniors. Tag it with the semester and subject so it&apos;s easy to find.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Select PDF File *
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 sm:p-4">
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={(event) => OnFileSelect(event)}
-                className="w-full text-sm"
-              />
-            </div>
-          </div>
+          <FileDropzone file={file} onFile={onFile} disabled={loading} error={fileError} onError={setFileError} />
 
           <div>
-            <label className="block text-sm font-medium mb-2">
-              File Name *
+            <label htmlFor="pyq-name" className="mb-1.5 block text-sm font-medium">
+              Paper name
             </label>
             <Input
-              placeholder="e.g., Data Structures PYQ 2023"
+              id="pyq-name"
+              placeholder="e.g. Data Structures End-Sem 2023"
               value={fileName}
               onChange={(e) => setFileName(e.target.value)}
-              className="w-full text-sm"
+              aria-invalid={submitted && !!errors.name}
+              aria-describedby={submitted && errors.name ? "pyq-name-error" : undefined}
             />
+            {fieldError("name")}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Semester *
+              <label htmlFor="pyq-semester" className="mb-1.5 block text-sm font-medium">
+                Semester
               </label>
-              <select
+              <Select
+                id="pyq-semester"
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
-                className="w-full p-2 border rounded-md text-sm"
+                aria-invalid={submitted && !!errors.semester}
+                aria-describedby={submitted && errors.semester ? "pyq-semester-error" : undefined}
               >
-                <option value="">Select Semester</option>
+                <option value="">Select semester</option>
                 {SEMESTERS.map((sem) => (
                   <option key={sem} value={sem}>
                     {sem}
                   </option>
                 ))}
-              </select>
+              </Select>
+              {fieldError("semester")}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Subject *
+              <label htmlFor="pyq-subject" className="mb-1.5 block text-sm font-medium">
+                Subject
               </label>
-              <select
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                className="w-full p-2 border rounded-md text-sm"
+              <Select
+                id="pyq-subject"
+                value={subjectChoice}
+                onChange={(e) => setSubjectChoice(e.target.value)}
+                aria-invalid={submitted && !!errors.subject && subjectChoice !== OTHER}
+                aria-describedby={submitted && errors.subject ? "pyq-subject-error" : undefined}
               >
-                <option value="">Select Subject</option>
+                <option value="">Select subject</option>
                 {SUBJECTS.map((subj) => (
                   <option key={subj} value={subj}>
                     {subj}
                   </option>
                 ))}
-              </select>
-              <Input
-                placeholder="Or enter custom subject"
-                value={
-                  subject.includes("Custom:")
-                    ? subject.replace("Custom:", "")
-                    : ""
-                }
-                onChange={(e) =>
-                  setSubject(e.target.value ? `Custom:${e.target.value}` : "")
-                }
-                className="mt-2 text-sm"
-              />
+                <option value={OTHER}>Other (type it)</option>
+              </Select>
+              {subjectChoice !== OTHER && fieldError("subject")}
             </div>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <p className="text-xs sm:text-sm text-blue-800">
-              📝 <strong>Note:</strong> Your uploaded PYQ will be publicly
-              visible to all users. Please ensure you have the right to share
-              this content.
-            </p>
-          </div>
+          {subjectChoice === OTHER && (
+            <div>
+              <label htmlFor="pyq-custom-subject" className="mb-1.5 block text-sm font-medium">
+                Subject name
+              </label>
+              <Input
+                id="pyq-custom-subject"
+                autoFocus
+                placeholder="e.g. Engineering Drawing"
+                value={customSubject}
+                onChange={(e) => setCustomSubject(e.target.value)}
+                aria-invalid={submitted && !!errors.subject}
+                aria-describedby={submitted && errors.subject ? "pyq-subject-error" : undefined}
+              />
+              {fieldError("subject")}
+            </div>
+          )}
+
+          <p className="flex items-start gap-2 rounded-lg bg-primary/5 p-3 text-xs leading-relaxed text-foreground/80">
+            <Globe2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+            Everyone on CampusSphere will be able to see and download this paper. Only share material you&apos;re
+            allowed to share.
+          </p>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row sm:justify-end gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => setOpen(false)}
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button
-            onClick={onUpload}
-            disabled={loading}
-            className="w-full sm:w-auto"
-          >
+          <Button onClick={onUpload} disabled={loading}>
             {loading ? (
               <>
-                <Loader2Icon className="animate-spin mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                Uploading...
+                <Loader2Icon className="animate-spin" aria-hidden="true" /> Uploading…
               </>
             ) : (
               <>
-                <Upload className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                Upload PYQ
+                <Upload aria-hidden="true" /> Share paper
               </>
             )}
           </Button>

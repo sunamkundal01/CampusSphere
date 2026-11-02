@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
 import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
@@ -27,8 +26,8 @@ export async function GET(req) {
 
     // 2. Split the text into smaller chunck
     const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 100,
-        chunkOverlap: 20,
+        chunkSize: 1800,
+        chunkOverlap: 250,
       });
 
       const output = await splitter.createDocuments([pdfTextContent]);

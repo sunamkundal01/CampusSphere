@@ -1,41 +1,40 @@
 "use client";
 
-import { UserButton } from "../../../components/ui/UserButton";
-import { Menu } from "lucide-react";
 import React from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { Menu, Plus } from "lucide-react";
+import { UserButton } from "../../../components/ui/UserButton";
+import { Button } from "../../../components/ui/button";
+import UploadPrivatePdf from "./UploadPrivatePdf";
+import { currentNavItem } from "./navigation";
 
 const Header = ({ toggleSidebar }) => {
+  const pathname = usePathname();
+  const current = currentNavItem(pathname);
+
   return (
-    <div className="flex items-center justify-between p-4 sm:p-5 bg-white shadow-md border-b">
-      {/* Mobile hamburger menu */}
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur-lg sm:px-6 lg:px-8">
       <button
         onClick={toggleSidebar}
-        className="lg:hidden p-2 rounded-md hover:bg-gray-100 transition-colors"
-        aria-label="Toggle menu"
+        className="-ml-2 inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-secondary lg:hidden"
+        aria-label="Open menu"
       >
-        <Menu size={24} />
+        <Menu className="h-5 w-5" />
       </button>
 
-      {/* Logo/Title for mobile */}
-      <div className="lg:hidden">
-        <Link href="/" className="cursor-pointer">
-          <Image
-            src={"/logo.svg"}
-            alt="CampusSphere"
-            width={120}
-            height={90}
-            className="h-8 w-auto logo-primary"
-          />
-        </Link>
-      </div>
+      <p className="truncate font-display text-lg font-semibold">{current?.label || "Dashboard"}</p>
 
-      {/* User button */}
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <UploadPrivatePdf>
+          <Button size="sm" className="h-9">
+            <Plus aria-hidden="true" />
+            <span className="hidden sm:inline">Upload PDF</span>
+            <span className="sr-only sm:hidden">Upload PDF</span>
+          </Button>
+        </UploadPrivatePdf>
         <UserButton />
       </div>
-    </div>
+    </header>
   );
 };
 

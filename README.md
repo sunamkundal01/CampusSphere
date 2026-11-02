@@ -4,6 +4,10 @@ Your all-in-one academic collaboration platform connecting students through skil
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Online-green?style=for-the-badge&logo=vercel)](https://campus-sphere-nitsri.vercel.app/)
 
+## Technical Documentation
+
+- [Architecture, schemas, RAG calls, and technical reference](documents/README.md) — short notes with Mermaid diagrams.
+
 ## Features
 
 - **Academic Material Sharing** - Upload and share PYQs (Previous Year Questions) with your academic community
@@ -11,7 +15,7 @@ Your all-in-one academic collaboration platform connecting students through skil
 - **Personal Workspace** - Private note-taking with a rich text editor and AI-powered PDF analysis
 - **Smart Discovery** - Find study partners and collaborators through skill-based matching
 - **Community Profiles** - Showcase your academic journey, skills, and expertise
-- **AI Chat with PDFs** - Upload PDFs and ask questions to get summaries and insights powered by Google Gemini
+- **AI Chat with PDFs** - Upload PDFs and ask questions to get summaries and insights powered by Groq
 - **Export Notes** - Export your notes as DOCX documents
 - **Real-time Database** - Built on Convex for seamless data synchronization
 
@@ -22,7 +26,7 @@ Your all-in-one academic collaboration platform connecting students through skil
 | **Framework** | Next.js 15 (App Router) |
 | **Backend** | Convex (Database, Server Functions & File Storage) |
 | **Authentication** | Firebase (Google OAuth) |
-| **AI** | Google Gemini API + LangChain |
+| **AI** | Groq API + document-scoped BM25 retrieval |
 | **Text Editor** | Tiptap |
 | **UI Components** | shadcn/ui (Radix UI) |
 | **Styling** | Tailwind CSS |
@@ -35,7 +39,7 @@ Your all-in-one academic collaboration platform connecting students through skil
 - [Node.js](https://nodejs.org/) v18 or higher
 - A [Firebase](https://console.firebase.google.com/) project with Google sign-in enabled
 - A [Convex](https://www.convex.dev/) account and project
-- A [Google Gemini API key](https://aistudio.google.com/app/apikey)
+- A [Groq API key](https://console.groq.com/keys)
 
 ### Installation
 
@@ -79,15 +83,15 @@ Your all-in-one academic collaboration platform connecting students through skil
    NEXT_PUBLIC_CONVEX_URL=https://your-deployment.convex.cloud
    CONVEX_DEPLOYMENT=dev:your-deployment
 
-   # Google Gemini AI
-   GEMINI_API_KEY=your_gemini_api_key
-   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
+   # Groq AI (server-side only)
+   GROQ_API_KEY=your_groq_api_key
+   GROQ_MODEL=qwen/qwen3.8-27b
    ```
 
    **Where to get these values:**
    - **Firebase** - Go to your [Firebase Console](https://console.firebase.google.com/) > Project Settings > General > Your apps > Web app config
    - **Convex** - Go to your [Convex Dashboard](https://dashboard.convex.dev/) > Settings > URL & Deploy Key
-   - **Gemini** - Go to [Google AI Studio](https://aistudio.google.com/app/apikey) and create an API key
+   - **Groq** - Go to [Groq Console](https://console.groq.com/keys) and create an API key
 
 5. **Run the development server**
 
@@ -107,13 +111,19 @@ Your all-in-one academic collaboration platform connecting students through skil
 
    Visit [http://localhost:3000](http://localhost:3000) in your browser.
 
+## AI Configuration
+
+AI answers use Groq with `qwen/qwen3.8-27b`, selected for academic explanations, PDF question answering, and a 131K-token context window. It is currently a preview model; override it with `GROQ_MODEL` if needed. See [Groq model documentation](https://console.groq.com/docs/model/qwen/qwen3.8-27b). Keep `GROQ_API_KEY` server-side; no public AI key is needed.
+
+Groq does not provide embeddings. PDF text is stored in Convex and ranked within the selected file using BM25 keyword retrieval. This avoids a second AI provider, but paraphrased queries can be less effective than semantic vector search. Existing PDF chunks remain readable. Run `npx convex dev` to sync the changed backend/schema before using uploads and AI answers. Scanned PDFs require OCR, which is not included.
+
 ## Project Structure
 
 ```
 CampusSphere/
 ├── app/
 │   ├── (auth)/              # Sign-in and sign-up pages
-│   ├── api/                 # API routes (Gemini AI, PDF loader)
+│   ├── api/                 # API routes (Groq AI, PDF loader)
 │   ├── dashboard/           # Main dashboard with community, profile, PYQs
 │   │   └── _components/     # Dashboard components
 │   └── workspace/           # Personal workspace (PDF viewer, text editor)
@@ -156,6 +166,33 @@ CampusSphere/
 | `npm run lint` | Run ESLint |
 | `npx convex dev` | Start Convex dev server and sync functions |
 
+## Testing
+
+Run the automated tests after installing dependencies:
+
+```bash
+npm test
+```
+
+Other test commands:
+
+| Command | Scope |
+|---------|-------|
+| `npm run test:ai` | Groq API validation, provider failures, Markdown rendering, and HTML sanitization |
+| `npm run test:backend` | Profiles, recommendations, PDF storage, notes, PYQs, and PDF retrieval |
+| `npm run test:watch` | Rerun the full suite when files change |
+
+The suite uses Node's built-in test runner and `convex-test` with a fresh in-memory database for each backend test. Groq requests are mocked. Tests do not need `.env.local`, a running development server, a Convex login, or paid API calls, and do not change deployed data.
+
+Test files live in `tests/`:
+
+- `groq.test.mjs`: request boundaries, model configuration, provider errors, and answer formatting.
+- `profiles.test.mjs`: repeat sign-ins, profile completion, community filters, and skill recommendations.
+- `storage.test.mjs`: PDF metadata and storage URLs, note updates, PYQ uploads and filters, and invalid arguments.
+- `pdf-retrieval.test.mjs`: ingestion, re-uploading, document-scoped search, legacy chunks, ranking, and context limits.
+
+These are API, backend, and utility tests. Browser interactions, Firebase Google sign-in, live Groq responses, and PDF extraction/OCR are outside this suite.
+
 ## Contributing
 
 Contributions are welcome! Please follow these steps:
@@ -172,7 +209,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgments
 
-- [Google Gemini API](https://ai.google.dev/) for AI capabilities
+- [Groq API](https://groq.com/) for AI capabilities
 - [Convex](https://www.convex.dev/) for real-time database functionality
 - [Firebase](https://firebase.google.com/) for authentication
 - [Vercel](https://vercel.com/) for hosting and deployment

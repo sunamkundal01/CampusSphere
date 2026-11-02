@@ -1,733 +1,690 @@
 "use client";
 
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useMutation } from "convex/react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  Bold,
+  Check,
+  Download,
+  FileText,
+  Filter,
+  GraduationCap,
+  Heading2,
+  Italic,
+  Linkedin,
+  List,
+  Mail,
+  Menu,
+  Search,
+  Sparkles,
+  Upload,
+  UserCircle2,
+  Users,
+  X,
+} from "lucide-react";
 import { Button } from "../../components/ui/button";
+import { BrandLogo } from "../../components/ui/BrandLogo";
 import { api } from "../../convex/_generated/api";
 import { useUser } from "../../lib/GoogleAuthContext";
-import { useMutation } from "convex/react";
-import { useEffect } from "react";
+
+const NAV_LINKS = [
+  { href: "#features", label: "Features" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#about", label: "About" },
+];
 
 const HomePage = () => {
   const { user } = useUser();
   const createuser = useMutation(api.user.createuser);
 
   useEffect(() => {
-    user && CheckUser();
-  }, [user]);
-
-  const CheckUser = async () => {
-    const result = await createuser({
+    if (!user) return;
+    createuser({
       email: user?.primaryEmailAddress?.emailAddress,
       imageURL: user?.imageUrl,
       userName: user?.fullName,
-    });
-
-    console.log(result);
-  };
-
-  // Function to close mobile menu
-  const closeMobileMenu = () => {
-    const toggleNav = document.getElementById('toggle_nav');
-    if (toggleNav) {
-      toggleNav.checked = false;
-    }
-  };
+    }).catch((error) => console.error("User sync failed:", error));
+  }, [user, createuser]);
 
   return (
-    <div>
-      {/* Nav and Hero Section */}
-      <div>
-        <div>
-          <div className="px-5">
-            <nav className="z-10 w-full">
-              <div>
-                <div className="flex flex-wrap items-center justify-between py-2 gap-6 md:py-4 md:gap-0 relative">
-                  <input
-                    aria-hidden="true"
-                    type="checkbox"
-                    id="toggle_nav"
-                    className="hidden peer"
-                    name="toggle_nav"
-                  />
-                  <div className="relative z-20 w-full flex justify-between lg:w-max md:px-0">
-                    <a href="/" className="cursor-pointer">
-                      <img
-                        alt="CampusSphere logo"
-                        loading="lazy"
-                        width="120"
-                        height="90"
-                        decoding="async"
-                        src="/logo.svg"
-                        className="logo-primary logo-sidebar"
-                        style={{ color: "transparent" }}
-                      />
-                    </a>
-                    <div className="relative flex items-center lg:hidden max-h-10">
-                      <label
-                        role="button"
-                        htmlFor="toggle_nav"
-                        aria-label="hamburger"
-                        id="hamburger"
-                        className="relative p-6 -mr-6"
-                      >
-                        <div
-                          aria-hidden="true"
-                          id="line"
-                          className="m-auto h-0.5 w-5 rounded bg-sky-900 dark:bg-gray-300 transition duration-300"
-                        ></div>
-                        <div
-                          aria-hidden="true"
-                          id="line2"
-                          className="m-auto mt-2 h-0.5 w-5 rounded bg-sky-900 dark:bg-gray-300 transition duration-300"
-                        ></div>
-                      </label>
-                    </div>
-                  </div>
-                  <div
-                    aria-hidden="true"
-                    className="fixed z-10 inset-0 h-screen w-screen bg-white/70 backdrop-blur-2xl origin-bottom scale-y-0 transition duration-500 peer-checked:origin-top peer-checked:scale-y-100 lg:hidden dark:bg-gray-900/70"
-                    onClick={closeMobileMenu}
-                  ></div>
-                  <div className="flex-col z-20 flex-wrap gap-6 p-8 rounded-3xl border border-gray-100 bg-white shadow-2xl shadow-gray-600/10 justify-end w-full invisible opacity-0 translate-y-1 absolute top-full left-0 transition-all duration-300 scale-95 origin-top lg:relative lg:scale-100 lg:peer-checked:translate-y-0 lg:translate-y-0 lg:flex lg:flex-row lg:items-center lg:gap-0 lg:p-0 lg:bg-transparent lg:w-7/12 lg:visible lg:opacity-100 lg:border-none peer-checked:scale-100 peer-checked:opacity-100 peer-checked:visible lg:shadow-none dark:shadow-none dark:bg-gray-800 dark:border-gray-700">
-                    <div className="text-gray-600 dark:text-gray-300 lg:pr-4 lg:w-auto w-full lg:pt-0">
-                      <ul className="tracking-wide font-medium lg:text-sm flex-col flex lg:flex-row gap-6 lg:gap-0">
-                        <li>
-                          <a
-                            href="#dashboard"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>Dashboard</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#workspace"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>Workspace</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#pyqs"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>PYQs</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#community"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>Community</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#contact"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>Contact Me</span>
-                          </a>
-                        </li>
-                        <li>
-                          <a
-                            href="#profile"
-                            className="block md:px-4 transition hover:text-primary"
-                            onClick={closeMobileMenu}
-                          >
-                            <span>Profile</span>
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="mt-12 lg:mt-0 flex gap-3">
-                      <a
-                        href="/sign-in"
-                        className="relative flex h-9 w-full items-center justify-center px-4 before:absolute before:inset-0 before:rounded-full before:border before:border-primary before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 sm:w-max"
-                        onClick={closeMobileMenu}
-                      >
-                        <span className="relative text-sm font-semibold text-primary">
-                          Log In
-                        </span>
-                      </a>
-                      <a
-                        href="/sign-up"
-                        className="relative flex h-9 w-full items-center justify-center px-4 before:absolute before:inset-0 before:rounded-full before:bg-primary before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 sm:w-max"
-                        onClick={closeMobileMenu}
-                      >
-                        <span className="relative text-sm font-semibold text-white">
-                          Sign Up
-                        </span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </nav>
-          </div>
-        </div>
-
-        {/* Hero Section */}
-        <div className="relative" id="home">
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 grid grid-cols-2 -space-x-52 opacity-40 dark:opacity-20"
-          >
-            <div className="blur-[106px] h-56 bg-gradient-to-br from-primary to-purple-400 dark:from-blue-700"></div>
-            <div className="blur-[106px] h-32 bg-gradient-to-r from-cyan-400 to-sky-300 dark:to-indigo-600"></div>
-          </div>
-          <div>
-            <div className="relative pt-36 ml-auto">
-              <div className="lg:w-2/3 text-center mx-auto">
-                <h1 className="text-gray-900 dark:text-white font-bold text-5xl md:text-6xl xl:text-7xl">
-                  Welcome to <span className="text-primary">Campus</span>
-                  <span className="text-blue-500">Sphere</span>
-                </h1>
-                <p className="mt-8 text-gray-700 dark:text-gray-300">
-                  Your all-in-one platform for academic collaboration. Share
-                  study materials, connect with peers through skill-based
-                  discovery, and manage your personal workspace for private
-                  notes - all in one place.
-                </p>
-                <div className="mt-16 flex flex-wrap justify-center gap-y-4 gap-x-6">
-                  <a
-                    href="/sign-in"
-                    className="relative flex h-11 w-full items-center justify-center px-6 before:absolute before:inset-0 before:rounded-full before:bg-primary before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 sm:w-max"
-                  >
-                    <span className="relative text-base font-semibold text-white">
-                      Log In
-                    </span>
-                  </a>
-                  <a
-                    href="#dashboard"
-                    className="relative flex h-11 w-full items-center justify-center px-6 before:absolute before:inset-0 before:rounded-full before:border before:border-transparent before:bg-primary/10 before:bg-gradient-to-b before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 dark:before:border-gray-700 dark:before:bg-gray-800 sm:w-max"
-                  >
-                    <span className="relative text-base font-semibold text-primary dark:text-white">
-                      Explore Features
-                    </span>
-                  </a>
-                </div>
-                <div className="hidden py-8 mt-16 border-y gap-x-10 border-gray-100 dark:border-gray-800 sm:flex justify-between">
-                  <div className="text-left">
-                    <h6 className="text-lg font-semibold text-gray-700 dark:text-white">
-                      Academic Sharing
-                    </h6>
-                    <p className="mt-2 text-gray-500">
-                      Share PYQs and study materials with your academic
-                      community.
-                    </p>
-                  </div>
-                  <div className="text-left">
-                    <h6 className="text-lg font-semibold text-gray-700 dark:text-white">
-                      Student Networking
-                    </h6>
-                    <p className="mt-2 text-gray-500">
-                      Connect with peers based on skills, interests, and
-                      academic goals.
-                    </p>
-                  </div>
-                  <div className="text-left">
-                    <h6 className="text-lg font-semibold text-gray-700 dark:text-white">
-                      Personal Workspace
-                    </h6>
-                    <p className="mt-2 text-gray-500">
-                      Upload and manage private notes with AI-powered insights.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Feature Sections */}
-      <div className="bg-gray-50 dark:bg-gray-900 py-16">
-        <div className="max-w-7xl mx-auto px-5">
-          {/* Dashboard Section */}
-          <section id="dashboard" className="mb-24 scroll-mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full mb-6">
-                <svg
-                  className="w-8 h-8 text-blue-600 dark:text-blue-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v10z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Dashboard
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Your central hub for managing all academic activities. Get an
-                overview of your uploads, community interactions, and quick
-                access to all features.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Quick Overview
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  View your recent uploads, community activity, and progress at
-                  a glance.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Easy Navigation
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Access all features through an intuitive sidebar with
-                  responsive mobile design.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Progress Tracking
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Monitor your uploads, contributions, and engagement within the
-                  academic community.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Workspace Section */}
-          <section id="workspace" className="mb-24 scroll-mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full mb-6">
-                <svg
-                  className="w-8 h-8 text-green-600 dark:text-green-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Personal Workspace
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Your private space for uploading, organizing, and interacting
-                with your personal study materials using AI-powered insights.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  AI-Powered Notes
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Upload PDFs and interact with them using advanced AI
-                  technology. Ask questions, get summaries, and extract key
-                  insights from your documents.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• Intelligent document processing</li>
-                  <li>• Interactive Q&A with your PDFs</li>
-                  <li>• Smart content extraction</li>
-                </ul>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Private & Secure
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Your workspace is completely private. Only you can access your
-                  uploaded documents and notes, ensuring confidentiality of your
-                  study materials.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• Personal document library</li>
-                  <li>• Secure file storage</li>
-                  <li>• Private AI interactions</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* PYQs Section */}
-          <section id="pyqs" className="mb-24 scroll-mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full mb-6">
-                <svg
-                  className="w-8 h-8 text-purple-600 dark:text-purple-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C20.832 18.477 19.246 18 17.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Previous Year Questions (PYQs)
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Access and contribute to a collaborative repository of previous
-                year question papers, organized by semester and subject for easy
-                discovery.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Browse & Download
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Search through an extensive collection of PYQs filtered by
-                  semester, subject, and academic year. Download papers shared
-                  by fellow students.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• Advanced filtering options</li>
-                  <li>• Semester-wise organization</li>
-                  <li>• Instant downloads</li>
-                </ul>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Share & Contribute
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Upload your own PYQ collection to help fellow students. Build
-                  a stronger academic community through resource sharing.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• Easy upload process</li>
-                  <li>• Community contribution tracking</li>
-                  <li>• Helps fellow students</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Community Section */}
-          <section id="community" className="mb-24 scroll-mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 dark:bg-orange-900 rounded-full mb-6">
-                <svg
-                  className="w-8 h-8 text-orange-600 dark:text-orange-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Student Community
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Connect with fellow students across your college through
-                skill-based discovery and academic interests. Build meaningful
-                academic relationships.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Skill-Based Discovery
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Find students with complementary skills and expertise. Connect
-                  with peers who share your academic interests and goals.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Smart Recommendations
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Get personalized recommendations for peers based on your
-                  profile, skills, and academic journey.
-                </p>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                  Academic Networking
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Build professional relationships early in your academic
-                  career. Connect on LinkedIn and grow your network.
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Profile Section */}
-          <section id="profile" className="mb-16 scroll-mt-20">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900 rounded-full mb-6">
-                <svg
-                  className="w-8 h-8 text-indigo-600 dark:text-indigo-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                Profile Management
-              </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                Create and manage your academic profile. Showcase your skills,
-                interests, and academic journey to connect with like-minded
-                peers.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Academic Identity
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Build a comprehensive academic profile including your
-                  department, batch, skills, and interests. Help others discover
-                  your expertise.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• Department and batch information</li>
-                  <li>• Skills and expertise showcase</li>
-                  <li>• Academic interests and goals</li>
-                </ul>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  Connect & Collaborate
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Link your professional profiles and make it easy for peers to
-                  connect with you beyond the platform.
-                </p>
-                <ul className="text-sm text-gray-500 dark:text-gray-400 space-y-1">
-                  <li>• LinkedIn integration</li>
-                  <li>• Professional networking</li>
-                  <li>• Easy contact management</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      {/* Developer Section */}
-      <section id="contact" className="bg-white dark:bg-gray-900 py-16 px-5">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-800 rounded-2xl p-8 md:p-10">
-            {/* Left - Photo */}
-            <div className="flex-shrink-0">
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-500 rounded-full blur-sm opacity-75"></div>
-                <img
-                  src="/sunam.jpg"
-                  alt="Sunam Kundal"
-                  className="relative w-36 h-36 md:w-44 md:h-44 rounded-full object-cover border-4 border-white dark:border-gray-900 shadow-xl"
-                />
-              </div>
-            </div>
-
-            {/* Right - Info */}
-            <div className="flex-1 text-center md:text-left">
-              <p className="text-sm font-semibold text-primary uppercase tracking-wider mb-1">Developer</p>
-              <h3 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-                Sunam Kundal
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-lg leading-relaxed">
-                I built CampusSphere with one belief — <strong className="text-gray-900 dark:text-white">learning shouldn&apos;t be limited by communication gaps.</strong> PYQs and study materials often get lost in chats or locked within batches. Access can literally change outcomes.
-              </p>
-              <p className="text-gray-600 dark:text-gray-400 mb-5 max-w-lg leading-relaxed italic text-primary font-medium">
-                Let&apos;s collaborate, share resources, and ensure knowledge flows forward.
-              </p>
-
-              {/* Contact & Socials */}
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <a
-                  href="mailto:kundalsunam@gmail.com"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium hover:shadow-md transition-all"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect width="20" height="16" x="2" y="4" rx="2"/>
-                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-                  </svg>
-                  kundalsunam@gmail.com
-                </a>
-                <a
-                  href="https://github.com/sunamkundal01"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gray-900 dark:bg-gray-600 text-white text-sm font-medium hover:shadow-md hover:scale-105 transition-all"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                  </svg>
-                  GitHub
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/sunamkundal/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:shadow-md hover:scale-105 transition-all"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  LinkedIn
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer Section */}
-      <footer className="bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-7xl mx-auto px-5 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* About CampusSphere */}
-            <div className="lg:col-span-2">
-              <a href="/" className="cursor-pointer inline-block">
-                <img
-                  alt="CampusSphere logo"
-                  loading="lazy"
-                  width="120"
-                  height="90"
-                  decoding="async"
-                  src="/logo.svg"
-                  className="mb-4 logo-primary logo-sidebar"
-                  style={{ color: "transparent" }}
-                />
-              </a>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                CampusSphere connects students through academic collaboration
-                and skill-based networking. Share study materials, discover
-                peers, and manage your personal learning workspace.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Quick Links
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#dashboard"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#workspace"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    Workspace
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#pyqs"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    PYQs
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#community"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    Community
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Community */}
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Features
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#profile"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    Profile Management
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="/sign-in"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    Log In
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#workspace"
-                    className="text-gray-600 dark:text-gray-400 hover:text-primary transition-colors"
-                  >
-                    AI-Powered Notes
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Footer */}
-          <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800 text-center">
-            <p className="text-gray-600 dark:text-gray-400">
-              © 2025 CampusSphere. Empowering students through collaborative
-              learning.
-            </p>
-          </div>
-        </div>
-      </footer>
+    <div className="min-h-dvh bg-background">
+      <SiteNav signedIn={!!user} />
+      <main>
+        <Hero signedIn={!!user} />
+        <Features />
+        <HowItWorks />
+        <About />
+        <FinalCta signedIn={!!user} />
+      </main>
+      <SiteFooter />
     </div>
   );
 };
 
 export default HomePage;
+
+/* ---------------------------------------------------------------- Nav */
+
+function SiteNav({ signedIn }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-lg">
+      <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6" aria-label="Main">
+        <BrandLogo priority />
+
+        <ul className="hidden items-center gap-1 md:flex">
+          {NAV_LINKS.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div className="hidden items-center gap-2 md:flex">
+          {signedIn ? (
+            <Button asChild>
+              <Link href="/dashboard">
+                Open dashboard <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost">
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/sign-up">Get started free</Link>
+              </Button>
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex h-10 w-10 items-center justify-center rounded-lg hover:bg-secondary md:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
+          aria-label={open ? "Close menu" : "Open menu"}
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </nav>
+
+      {open && (
+        <div id="mobile-nav" className="border-t bg-background px-4 pb-6 pt-2 md:hidden">
+          <ul className="space-y-1">
+            {NAV_LINKS.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="block rounded-lg px-3 py-3 font-medium hover:bg-secondary"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 grid gap-2">
+            {signedIn ? (
+              <Button asChild size="lg">
+                <Link href="/dashboard">Open dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild size="lg">
+                  <Link href="/sign-up">Get started free</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/sign-in">Sign in</Link>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+/* --------------------------------------------------------------- Hero */
+
+function Hero({ signedIn }) {
+  return (
+    <section className="relative overflow-hidden" aria-labelledby="hero-title">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[640px]">
+        <div className="absolute left-1/2 top-[-180px] h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-cyan-400/20 to-ai/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--border)/0.6)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--border)/0.6)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" />
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pt-24">
+        <p className="mx-auto inline-flex items-center gap-2 rounded-full border bg-card px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm">
+          <span className="flex h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true" />
+          Free for every student · Sign in with Google
+        </p>
+
+        <h1
+          id="hero-title"
+          className="mx-auto mt-6 max-w-4xl text-4xl font-semibold leading-[1.08] text-foreground [text-wrap:balance] sm:text-5xl lg:text-6xl"
+        >
+          Your semester, <span className="bg-gradient-to-r from-primary to-cyan-500 bg-clip-text text-transparent">organised</span>.
+          PYQs, AI notes and classmates in one place.
+        </h1>
+
+        <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground [text-wrap:pretty]">
+          Stop hunting for last year&apos;s papers in group chats. CampusSphere gives you a shared PYQ library,
+          a workspace where AI answers questions from your own PDFs, and a directory of students to learn with.
+        </p>
+
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button asChild size="lg" className="w-full sm:w-auto">
+            <Link href={signedIn ? "/dashboard" : "/sign-up"}>
+              {signedIn ? "Go to your dashboard" : "Start studying smarter"}
+              <ArrowRight aria-hidden="true" />
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+            <a href="#how-it-works">See how it works</a>
+          </Button>
+        </div>
+
+        <div className="relative mx-auto mt-16 max-w-5xl">
+          <WorkspaceMockup />
+          <FloatingCard className="-left-8 bottom-8 hidden lg:flex" delay="0.2s">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <BookOpenCheck className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="text-left">
+              <p className="text-xs text-muted-foreground">New PYQ added</p>
+              <p className="text-sm font-semibold">Operating Systems · 2024</p>
+            </div>
+          </FloatingCard>
+          <FloatingCard className="-right-8 top-20 hidden lg:flex" delay="0.35s">
+            <div className="flex -space-x-2" aria-hidden="true">
+              {["AK", "RS", "MJ"].map((n, i) => (
+                <span
+                  key={n}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-card text-[11px] font-semibold text-white ${
+                    ["bg-primary", "bg-cyan-600", "bg-ai"][i]
+                  }`}
+                >
+                  {n}
+                </span>
+              ))}
+            </div>
+            <div className="text-left">
+              <p className="text-xs text-muted-foreground">Study partners</p>
+              <p className="text-sm font-semibold">3 classmates know DBMS</p>
+            </div>
+          </FloatingCard>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FloatingCard({ className = "", delay, children }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{ animationDelay: delay }}
+      className={`absolute z-10 animate-fade-up items-center gap-3 rounded-xl border bg-card/95 px-4 py-3 shadow-xl shadow-slate-900/10 backdrop-blur ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+// A static, illustrative recreation of the real workspace screen.
+function WorkspaceMockup() {
+  return (
+    <figure
+      className="overflow-hidden rounded-2xl border bg-card text-left shadow-2xl shadow-primary/10 ring-1 ring-slate-900/5"
+      aria-label="Preview of the CampusSphere workspace: notes on the left, the PDF on the right, with an AI answer drawn from the PDF"
+    >
+      <div className="flex items-center gap-2 border-b bg-secondary/60 px-4 py-3">
+        <span className="h-3 w-3 rounded-full bg-red-400" aria-hidden="true" />
+        <span className="h-3 w-3 rounded-full bg-amber-400" aria-hidden="true" />
+        <span className="h-3 w-3 rounded-full bg-emerald-400" aria-hidden="true" />
+        <span className="ml-3 flex items-center gap-2 truncate text-xs font-medium text-muted-foreground">
+          <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+          DBMS – Unit 3 Normalization.pdf
+        </span>
+        <span className="ml-auto hidden items-center gap-1 rounded-md bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success sm:flex">
+          <Check className="h-3 w-3" aria-hidden="true" /> Saved
+        </span>
+      </div>
+
+      <div className="grid md:grid-cols-2">
+        {/* Notes pane */}
+        <div className="border-b md:border-b-0 md:border-r">
+          <div className="flex items-center gap-1 border-b px-4 py-2 text-muted-foreground" aria-hidden="true">
+            {[Heading2, Bold, Italic, List].map((Icon, i) => (
+              <span key={i} className="flex h-7 w-7 items-center justify-center rounded-md hover:bg-secondary">
+                <Icon className="h-4 w-4" />
+              </span>
+            ))}
+            <span className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-ai px-2.5 py-1 text-xs font-semibold text-ai-foreground">
+              <Sparkles className="h-3.5 w-3.5" /> Ask AI
+            </span>
+          </div>
+          <div className="space-y-3 p-5 text-sm">
+            <p className="font-display text-lg font-semibold">Unit 3: Normal forms</p>
+            <p className="text-muted-foreground">Key idea: remove redundancy by splitting relations on dependencies.</p>
+            <p>
+              <mark className="rounded bg-primary/15 px-1 py-0.5 text-foreground">
+                How is BCNF different from 3NF?
+              </mark>
+            </p>
+            <div className="rounded-xl border border-ai/25 bg-ai/5 p-4">
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-ai">
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" /> Answer from your PDF
+              </p>
+              <p className="mt-2 leading-relaxed text-foreground/90">
+                BCNF is stricter: every determinant must be a candidate key. 3NF still allows a dependency
+                X → A when A is part of some candidate key.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">Based on pages 14–15</p>
+            </div>
+          </div>
+        </div>
+
+        {/* PDF pane */}
+        <div className="hidden bg-secondary/40 p-6 md:block" aria-hidden="true">
+          <div className="mx-auto h-full max-w-sm rounded-lg bg-card p-6 shadow-sm ring-1 ring-border">
+            <div className="h-3 w-2/3 rounded bg-foreground/80" />
+            <div className="mt-5 space-y-2">
+              {[100, 92, 96, 70].map((w, i) => (
+                <div key={i} className="h-2 rounded bg-muted-foreground/20" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+            <div className="mt-5 space-y-2 rounded-md bg-primary/10 p-2 ring-1 ring-primary/30">
+              {[96, 100, 64].map((w, i) => (
+                <div key={i} className="h-2 rounded bg-primary/40" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+            <div className="mt-5 space-y-2">
+              {[88, 100, 94, 80, 60].map((w, i) => (
+                <div key={i} className="h-2 rounded bg-muted-foreground/20" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+            <div className="mt-6 grid grid-cols-3 gap-2">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-10 rounded border border-dashed border-muted-foreground/30" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  );
+}
+
+/* ----------------------------------------------------------- Features */
+
+function SectionHeading({ eyebrow, title, body, id }) {
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      <p className="text-sm font-semibold uppercase tracking-widest text-primary">{eyebrow}</p>
+      <h2 id={id} className="mt-3 text-3xl font-semibold [text-wrap:balance] sm:text-4xl">
+        {title}
+      </h2>
+      {body && <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{body}</p>}
+    </div>
+  );
+}
+
+function FeatureCard({ icon: Icon, tone = "primary", title, body, className = "", children }) {
+  const tones = {
+    primary: "bg-primary/10 text-primary",
+    ai: "bg-ai/10 text-ai",
+    cyan: "bg-cyan-500/10 text-cyan-700",
+    success: "bg-success/10 text-success",
+  };
+  return (
+    <article
+      className={`group flex flex-col overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-shadow duration-200 hover:shadow-lg hover:shadow-slate-900/5 ${className}`}
+    >
+      <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${tones[tone]}`}>
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <h3 className="mt-5 text-xl font-semibold">{title}</h3>
+      <p className="mt-2 leading-relaxed text-muted-foreground">{body}</p>
+      {children && (
+        <div className="mt-6 flex-1" aria-hidden="true">
+          {children}
+        </div>
+      )}
+    </article>
+  );
+}
+
+function Features() {
+  return (
+    <section id="features" className="scroll-mt-20 border-t bg-card/50 py-20 sm:py-28" aria-labelledby="features-title">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <SectionHeading
+          id="features-title"
+          eyebrow="What's inside"
+          title="Four tools that replace the WhatsApp-group scramble"
+          body="Each one does one job well, and they work better together."
+        />
+
+        <div className="mt-14 grid gap-5 lg:grid-cols-3">
+          <FeatureCard
+            icon={Sparkles}
+            tone="ai"
+            title="AI study workspace"
+            body="Upload lecture notes or a textbook chapter. Write notes next to the PDF, highlight a question, and get an answer pulled from that document, not the open internet."
+            className="lg:col-span-2"
+          >
+            <div className="grid gap-3 rounded-xl border bg-background p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+              <div>
+                <p className="text-sm">
+                  <mark className="rounded bg-primary/15 px-1">Explain the producer–consumer problem</mark>
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">Select text, then click Ask AI</p>
+              </div>
+              <span className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-ai px-3 py-2 text-xs font-semibold text-ai-foreground">
+                <Sparkles className="h-3.5 w-3.5" /> Ask AI
+              </span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
+                <Download className="h-3 w-3" /> Export to DOCX or PDF
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1">
+                <FileText className="h-3 w-3" /> Private to you
+              </span>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard
+            icon={BookOpenCheck}
+            title="PYQ library"
+            body="Previous year papers shared by your seniors, filterable by semester and subject."
+          >
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground">
+                  <Filter className="h-3 w-3" /> 5th Sem
+                </span>
+                <span className="rounded-full border px-2.5 py-1 text-xs text-muted-foreground">Computer Networks</span>
+              </div>
+              {["CN Mid-Sem 2024", "CN End-Sem 2023"].map((t) => (
+                <div key={t} className="flex items-center gap-3 rounded-lg border bg-background px-3 py-2.5">
+                  <FileText className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium">{t}</span>
+                  <ArrowRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                </div>
+              ))}
+            </div>
+          </FeatureCard>
+
+          <FeatureCard
+            icon={Users}
+            tone="cyan"
+            title="Skill-based community"
+            body="Find classmates by what they know, not just who you already follow. Recommendations match your skills."
+          >
+            <div className="rounded-xl border bg-background p-4">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-600 text-sm font-semibold text-white">
+                  PS
+                </span>
+                <div>
+                  <p className="text-sm font-semibold">Priya S.</p>
+                  <p className="text-xs text-muted-foreground">CSE · Batch 2026</p>
+                </div>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {["React", "DBMS", "Python"].map((s, i) => (
+                  <span
+                    key={s}
+                    className={`rounded-full px-2 py-0.5 text-xs ${i === 1 ? "bg-success/10 text-success" : "bg-secondary"}`}
+                  >
+                    {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard
+            icon={UserCircle2}
+            tone="success"
+            title="A profile that gets you found"
+            body="Department, batch, skills and LinkedIn in one card, so the right people can reach you."
+          >
+            <div className="rounded-xl border bg-background p-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium">Profile strength</span>
+                <span className="font-semibold text-success">85%</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-secondary">
+                <div className="h-full w-[85%] rounded-full bg-success" />
+              </div>
+            </div>
+          </FeatureCard>
+
+          <FeatureCard
+            icon={Search}
+            title="Everything searchable"
+            body="Search your documents, papers and people from the dashboard. Nothing gets lost in a scroll-back again."
+          >
+            <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2.5 text-sm text-muted-foreground">
+              <Search className="h-4 w-4" /> Search &ldquo;compiler design&rdquo;
+            </div>
+          </FeatureCard>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* -------------------------------------------------------- How it works */
+
+const STEPS = [
+  {
+    icon: GraduationCap,
+    title: "Sign in and set up your profile",
+    body: "One click with Google. Add your department, batch and a few skills so classmates can find you.",
+  },
+  {
+    icon: Upload,
+    title: "Bring your material",
+    body: "Upload a PDF to your private workspace, or share a past paper with everyone in the PYQ library.",
+  },
+  {
+    icon: Sparkles,
+    title: "Study with help",
+    body: "Ask AI about your PDF, export your notes before the exam, and reach out to peers who know the topic.",
+  },
+];
+
+function HowItWorks() {
+  return (
+    <section id="how-it-works" className="scroll-mt-20 py-20 sm:py-28" aria-labelledby="how-title">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <SectionHeading id="how-title" eyebrow="How it works" title="From sign-in to studying in under a minute" />
+        <ol className="mt-14 grid gap-5 md:grid-cols-3">
+          {STEPS.map(({ icon: Icon, title, body }, i) => (
+            <li key={title} className="relative rounded-2xl border bg-card p-6 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+                  {i + 1}
+                </span>
+                <Icon className="h-5 w-5 text-muted-foreground" aria-hidden="true" />
+              </div>
+              <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+              <p className="mt-2 leading-relaxed text-muted-foreground">{body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+/* --------------------------------------------------------------- About */
+
+function About() {
+  return (
+    <section id="about" className="scroll-mt-20 border-t bg-card/50 py-20 sm:py-28" aria-labelledby="about-title">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="grid items-center gap-10 rounded-3xl border bg-card p-8 shadow-sm md:grid-cols-[auto_1fr] md:p-12">
+          <div className="relative mx-auto">
+            <div aria-hidden="true" className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-primary to-cyan-400 opacity-70 blur-md" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/sunam.jpg"
+              alt="Sunam Kundal"
+              width={176}
+              height={176}
+              loading="lazy"
+              className="relative h-36 w-36 rounded-full border-4 border-card object-cover md:h-44 md:w-44"
+            />
+          </div>
+
+          <div className="text-center md:text-left">
+            <p className="text-sm font-semibold uppercase tracking-widest text-primary">Why I built this</p>
+            <h2 id="about-title" className="mt-3 text-3xl font-semibold">
+              Sunam Kundal
+            </h2>
+            <p className="mt-4 max-w-xl leading-relaxed text-muted-foreground">
+              I built CampusSphere with one belief:{" "}
+              <strong className="font-semibold text-foreground">
+                learning shouldn&apos;t be limited by communication gaps.
+              </strong>{" "}
+              PYQs and study materials often get lost in chats or locked within batches. Access can literally change
+              outcomes.
+            </p>
+            <blockquote className="mt-4 border-l-2 border-primary pl-4 text-left font-medium italic text-foreground/80">
+              Let&apos;s collaborate, share resources, and ensure knowledge flows forward.
+            </blockquote>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-2 md:justify-start">
+              <Button asChild variant="outline">
+                <a href="mailto:kundalsunam@gmail.com">
+                  <Mail aria-hidden="true" /> Email
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href="https://github.com/sunamkundal01" target="_blank" rel="noopener noreferrer">
+                  <GithubMark /> GitHub
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a href="https://www.linkedin.com/in/sunamkundal/" target="_blank" rel="noopener noreferrer">
+                  <Linkedin aria-hidden="true" /> LinkedIn
+                </a>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GithubMark() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------- CTA + footer */
+
+function FinalCta({ signedIn }) {
+  return (
+    <section className="px-4 py-20 sm:px-6 sm:py-28">
+      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl bg-slate-950 px-6 py-16 text-center text-white sm:px-12">
+        <div aria-hidden="true" className="absolute -top-24 left-1/2 h-72 w-[600px] -translate-x-1/2 rounded-full bg-primary/40 blur-3xl" />
+        <h2 className="relative text-3xl font-semibold [text-wrap:balance] sm:text-4xl">
+          Your next exam prep starts here
+        </h2>
+        <p className="relative mx-auto mt-4 max-w-xl text-slate-300">
+          Join your classmates, grab the papers you need, and let AI handle the &ldquo;wait, what does this mean?&rdquo;
+          moments.
+        </p>
+        <Button asChild size="lg" className="relative mt-8 bg-white text-slate-950 shadow-none hover:bg-white/90">
+          <Link href={signedIn ? "/dashboard" : "/sign-up"}>
+            {signedIn ? "Open dashboard" : "Create your free account"} <ArrowRight aria-hidden="true" />
+          </Link>
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function SiteFooter() {
+  return (
+    <footer className="border-t">
+      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[2fr_1fr_1fr]">
+        <div>
+          <BrandLogo />
+          <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+            The academic collaboration platform for sharing PYQs, studying with AI, and finding classmates who can help.
+          </p>
+        </div>
+        <FooterColumn
+          title="Product"
+          links={[
+            { href: "#features", label: "Features" },
+            { href: "#how-it-works", label: "How it works" },
+            { href: "/dashboard/pyqs", label: "PYQ library" },
+          ]}
+        />
+        <FooterColumn
+          title="Account"
+          links={[
+            { href: "/sign-in", label: "Sign in" },
+            { href: "/sign-up", label: "Create account" },
+            { href: "/dashboard/profile", label: "Your profile" },
+          ]}
+        />
+      </div>
+      <div className="border-t">
+        <p className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground sm:px-6">
+          © {new Date().getFullYear()} CampusSphere. Made for students, by a student.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+function FooterColumn({ title, links }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <ul className="mt-4 space-y-3">
+        {links.map((l) => (
+          <li key={l.label}>
+            <a href={l.href} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

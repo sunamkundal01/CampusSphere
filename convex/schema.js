@@ -27,10 +27,12 @@ export default defineSchema({
   }),
 
   documents: defineTable({
-    embedding: v.array(v.number()),
+    // Retain old vectors while new chunks use keyword retrieval.
+    embedding: v.optional(v.array(v.number())),
+    fileId: v.optional(v.string()),
     text: v.string(),
     metadata: v.any(),
-  }).vectorIndex("byEmbedding", {
+  }).index("by_fileId", ["fileId"]).vectorIndex("byEmbedding", {
     vectorField: "embedding",
     dimensions: 3072,
   }),

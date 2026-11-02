@@ -1,34 +1,40 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'next/navigation';
 import { useAction, useMutation } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
-import { AlignCenter, AlignLeft, AlignRight, BoldIcon, HighlighterIcon, Italic, Redo2Icon, SparklesIcon, Strikethrough, UnderlineIcon, Undo2Icon, WandSparklesIcon } from 'lucide-react';
+import { BoldIcon, Code2, Heading1, Heading2, Heading3, Italic, List, ListOrdered, Loader2, Quote, Redo2Icon, SparklesIcon, Strikethrough, UnderlineIcon, Undo2Icon } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 import { toast } from 'sonner';
 import { useUser } from '../../../lib/GoogleAuthContext';
 
 
 const EditExtenstion = ({ editor }) => {
-    // Only render the button if the editor is initialized
-    if (!editor) return null; // Early return if editor is null
-
     const {fileId} = useParams()
     const searchAi = useAction(api.myActions.search)
     const saveNotes = useMutation(api.notes.AddNotes)
     const {user} = useUser()
+    const [aiLoading, setAiLoading] = useState(false)
+
+    if (!editor) return null;
 
     const onAiClick=async()=>{
-      toast("AI is getting your answer 🪄")
       
+      if (aiLoading) return;
       try {
         const selectedText = editor.state.doc.textBetween(
           editor.state.selection.from,
           editor.state.selection.to,
           ' '
         )
-        console.log(selectedText);  
-        console.log(fileId);
-            
+        if (!selectedText.trim()) {
+          toast.error("Select a question in your notes first.", {
+            description: "Highlight the text you want answered, then press Ask AI.",
+          });
+          return;
+        }
+
+        setAiLoading(true);
         const result = await searchAi({
           query:selectedText,
           fileId:fileId
@@ -37,14 +43,17 @@ const EditExtenstion = ({ editor }) => {
         const UnformatedAnwer = JSON.parse(result);
         let AllUnformatedAnwer = '';
         UnformatedAnwer&&UnformatedAnwer.forEach(item=>{
-          AllUnformatedAnwer = AllUnformatedAnwer+item.pageContent
+          AllUnformatedAnwer = AllUnformatedAnwer+'\n\n'+item.pageContent
         })
         
-        const PROMPT = "For question :"+selectedText+" and with the given content as answer, please give appropriate only one answer in HTML format. The answer content is: "+AllUnformatedAnwer
+        if (!AllUnformatedAnwer.trim()) {
+          throw new Error("No PDF text found. Please upload a PDF containing selectable text.");
+        }
+        const PROMPT = "Question:\n" + selectedText + "\n\nPDF excerpts:\n" + AllUnformatedAnwer;
            
 
         // Call the server-side API route instead of direct client-side call
-        const apiResponse = await fetch('/api/gemini', {
+        const apiResponse = await fetch('/api/groq', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -61,111 +70,118 @@ const EditExtenstion = ({ editor }) => {
           throw new Error(apiData.error || 'Failed to get AI response');
         }
 
-        console.log(apiData.response);
-        const finalAns = apiData.response.replace('```','').replace('html','').replace('```','')
+        // The server returns sanitized editor HTML, regardless of model format.
+        // Append using an editor transaction so existing content and undo survive.
+        editor.chain().focus().insertContentAt(editor.state.doc.content.size,
+          '<hr>' + apiData.response + '<p></p>'
+        ).run();
         
-        const AllText= editor.getHTML();
-        editor.commands.setContent(AllText+'<p> <strong> Answer: </strong></p>'+finalAns)
-        
-        saveNotes({
+        await saveNotes({
           notes:editor.getHTML(),
           fileId:fileId,
           createdBy:user?.primaryEmailAddress.emailAddress
         })
         
-        toast.success("AI response received successfully! ✨")
+        toast.success("Answer added to your notes")
       } catch (error) {
-        console.error("Gemini API Error:", error);
-        toast.error("Failed to get AI response. Please try again or check your API key configuration.");
+        console.error("AI answer failed");
+        toast.error(error.message || "Failed to get AI response. Please try again.");
+      } finally {
+        setAiLoading(false);
       }
       
     }
     
-    return editor&&(
-      <div className='p-5'>
-        <div className="control-group">
-          <div className="button-group flex md:gap-3 gap-x-1">
-            <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-            className={editor.isActive('heading', { level: 1 }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            H1
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-            className={editor.isActive('heading', { level: 2 }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            H2
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-            className={editor.isActive('heading', { level: 3 }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            H3
-          </button>
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={editor.isActive('bold') ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-            >
-              <BoldIcon/>
-            </button>
-            <button
-            onClick={() => editor.chain().focus().toggleItalic().run()}
-            className={editor.isActive('italic') ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <Italic/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleUnderline().run()}
-            className={editor.isActive('underline') ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <UnderlineIcon/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleStrike().run()}
-            className={editor.isActive('strike') ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <Strikethrough/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().toggleHighlight().run()}
-            className={editor.isActive('highlight') ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <HighlighterIcon/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('left').run()}
-            className={editor.isActive({ textAlign: 'left' }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <AlignLeft/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('center').run()}
-            className={editor.isActive({ textAlign: 'center' }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <AlignCenter/>
-          </button>
-          <button
-            onClick={() => editor.chain().focus().setTextAlign('right').run()}
-            className={editor.isActive({ textAlign: 'right' }) ? 'bg-slate-200 rounded-md p-1 transition-all' : ''}
-          >
-            <AlignRight/>
-          </button>
-          <button onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
-            <Undo2Icon/>
-          </button>
-          <button onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
-            <Redo2Icon/>
-          </button>
-          <button
-            onClick={() => onAiClick()}
-            className={'hover:bg-slate-200 rounded-md p-1 transition-all'}
-          >
-            <SparklesIcon/>
-          </button>
-          </div>
+    const hasSelection = !editor.state.selection.empty;
+
+    return (
+      <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-card/95 px-3 py-2 backdrop-blur">
+        <div role="toolbar" aria-label="Formatting" className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <ToolButton label="Heading 1" active={editor.isActive('heading', { level: 1 })} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
+            <Heading1 />
+          </ToolButton>
+          <ToolButton label="Heading 2" active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
+            <Heading2 />
+          </ToolButton>
+          <ToolButton label="Heading 3" active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
+            <Heading3 />
+          </ToolButton>
+          <Divider />
+          <ToolButton label="Bold" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
+            <BoldIcon />
+          </ToolButton>
+          <ToolButton label="Italic" active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>
+            <Italic />
+          </ToolButton>
+          <ToolButton label="Underline" active={editor.isActive('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()}>
+            <UnderlineIcon />
+          </ToolButton>
+          <ToolButton label="Strikethrough" active={editor.isActive('strike')} onClick={() => editor.chain().focus().toggleStrike().run()}>
+            <Strikethrough />
+          </ToolButton>
+          <Divider />
+          <ToolButton label="Bulleted list" active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>
+            <List />
+          </ToolButton>
+          <ToolButton label="Numbered list" active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>
+            <ListOrdered />
+          </ToolButton>
+          <ToolButton label="Quote" active={editor.isActive('blockquote')} onClick={() => editor.chain().focus().toggleBlockquote().run()}>
+            <Quote />
+          </ToolButton>
+          <ToolButton label="Code block" active={editor.isActive('codeBlock')} onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
+            <Code2 />
+          </ToolButton>
+          <Divider />
+          <ToolButton label="Undo" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
+            <Undo2Icon />
+          </ToolButton>
+          <ToolButton label="Redo" onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
+            <Redo2Icon />
+          </ToolButton>
         </div>
+
+        <button
+          type="button"
+          onClick={() => onAiClick()}
+          disabled={aiLoading}
+          aria-busy={aiLoading}
+          title={hasSelection ? 'Answer the selected question using this PDF' : 'Select a question in your notes first'}
+          className={cn(
+            'inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-3 text-sm font-semibold transition-[background-color,box-shadow,opacity] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ai focus-visible:ring-offset-2 disabled:cursor-wait',
+            hasSelection || aiLoading
+              ? 'bg-ai text-ai-foreground shadow-sm shadow-ai/30 hover:bg-ai/90'
+              : 'bg-ai/10 text-ai hover:bg-ai/15'
+          )}
+        >
+          {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <SparklesIcon className="h-4 w-4" aria-hidden="true" />}
+          <span>{aiLoading ? 'Thinking…' : 'Ask AI'}</span>
+        </button>
       </div>
     );
   };
+
+function ToolButton({ label, active, disabled, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      aria-pressed={active === undefined ? undefined : active}
+      title={label}
+      className={cn(
+        'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md transition-colors [&_svg]:h-[18px] [&_svg]:w-[18px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-35',
+        active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Divider() {
+  return <span aria-hidden="true" className="mx-1 h-5 w-px shrink-0 bg-border" />;
+}
+
 export default EditExtenstion
